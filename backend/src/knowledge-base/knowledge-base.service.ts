@@ -1,5 +1,6 @@
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const pdfParse = require('pdf-parse') as (buffer: Buffer) => Promise<{ text: string }>;
+const pdfParse = require('pdf-parse') as any;
 
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
@@ -36,6 +37,7 @@ export class KnowledgeBaseService {
 
     this.runEmbedding(doc.id, buffer, filename).catch((err) => {
       this.logger.error(`Embedding failed for doc ${doc.id}`, err);
+      require('fs').appendFileSync('error.log', err?.stack || err + '\n');
     });
 
     return doc;
@@ -43,8 +45,10 @@ export class KnowledgeBaseService {
 
   private async runEmbedding(docId: string, buffer: Buffer, filename: string) {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const pdfParse = require('pdf-parse');
       const pdfData = await pdfParse(buffer);
-      const fullText = pdfData.text;
+      const fullText = pdfData.text.replace(/\0/g, '');
       const chunks = this.chunkText(fullText);
 
       this.logger.log(`Processing ${chunks.length} chunks for ${filename}`);

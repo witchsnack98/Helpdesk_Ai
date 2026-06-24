@@ -40,4 +40,4 @@ async function bootstrap() {
   console.log(`🚀 Helpdesk AI Backend running on http://localhost:${port}/api`);
 }
 
-bootstrap();
+bootstrap(); // Force reload
