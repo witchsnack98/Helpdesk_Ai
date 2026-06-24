@@ -1,0 +1,137 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [vector]
+}
+
+// ─────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────
+
+enum Role {
+  CUSTOMER
+  AGENT
+  ADMIN
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum EmbedStatus {
+  PROCESSING
+  SUCCESS
+  FAILED
+}
+
+// ─────────────────────────────────────────
+// MODELS
+// ─────────────────────────────────────────
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      Role     @default(CUSTOMER)
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  customerTickets Ticket[]  @relation("CustomerTickets")
+  agentTickets    Ticket[]  @relation("AgentTickets")
+  messages        Message[]
+
+  @@map("users")
+}
+
+model Ticket {
+  id          String       @id @default(cuid())
+  title       String
+  description String
+  status      TicketStatus @default(OPEN)
+  priority    Priority     @default(MEDIUM)
+  category    String?
+  sentiment   Float?       // -1.0 (very negative) to 1.0 (very positive)
+  imageUrls   String[]     @default([])
+  customerId  String
+  agentId     String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  customer User      @relation("CustomerTickets", fields: [customerId], references: [id], onDelete: Cascade)
+  agent    User?     @relation("AgentTickets", fields: [agentId], references: [id], onDelete: SetNull)
+  messages Message[]
+
+  @@index([status])
+  @@index([priority])
+  @@index([customerId])
+  @@index([agentId])
+  @@index([createdAt])
+  @@map("tickets")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  ticketId  String
+  senderId  String
+  isAI      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Relations
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender User   @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([senderId])
+  @@map("messages")
+}
+
+model KnowledgeDocument {
+  id         String      @id @default(cuid())
+  filename   String
+  fileUrl    String
+  fileSize   Int
+  status     EmbedStatus @default(PROCESSING)
+  chunkCount Int?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  chunks KnowledgeChunk[]
+
+  @@map("knowledge_documents")
+}
+
+model KnowledgeChunk {
+  id         String                     @id @default(cuid())
+  content    String
+  source     String
+  documentId String
+  embedding  Unsupported("vector(768)")?
+  createdAt  DateTime                   @default(now())
+
+  document KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@map("knowledge_chunks")
+}

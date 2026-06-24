@@ -1,0 +1,13 @@
+import { Module } from '@nestjs/common';
+import { TicketsController } from './tickets.controller';
+import { TicketsService } from './tickets.service';
+import { GatewayModule } from '../gateway/gateway.module';
+import { AiModule } from '../ai/ai.module';
+
+@Module({
+  imports: [GatewayModule, AiModule],
+  controllers: [TicketsController],
+  providers: [TicketsService],
+  exports: [TicketsService],
+})
+export class TicketsModule {}
