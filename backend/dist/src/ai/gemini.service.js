@@ -24,7 +24,7 @@ let GeminiService = GeminiService_1 = class GeminiService {
     }
     async generateText(prompt) {
         try {
-            const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+            const model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
             const result = await model.generateContent(prompt);
             return result.response.text();
         }
@@ -35,8 +35,11 @@ let GeminiService = GeminiService_1 = class GeminiService {
     }
     async generateEmbedding(text) {
         try {
-            const model = this.genAI.getGenerativeModel({ model: 'text-embedding-004' });
-            const result = await model.embedContent(text);
+            const model = this.genAI.getGenerativeModel({ model: 'gemini-embedding-2' });
+            const result = await model.embedContent({
+                content: { role: 'user', parts: [{ text }] },
+                outputDimensionality: 768,
+            });
             return result.embedding.values;
         }
         catch (error) {

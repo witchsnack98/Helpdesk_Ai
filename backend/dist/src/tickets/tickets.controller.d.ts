@@ -11,15 +11,13 @@ export declare class TicketsController {
         id: string;
     }): Promise<{
         customer: {
-            name: string;
-            email: string;
             id: string;
+            email: string;
+            name: string;
             avatar: string | null;
         };
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
         description: string;
         status: import("@prisma/client").$Enums.TicketStatus;
@@ -27,29 +25,29 @@ export declare class TicketsController {
         category: string | null;
         sentiment: number | null;
         imageUrls: string[];
+        createdAt: Date;
+        updatedAt: Date;
         customerId: string;
         agentId: string | null;
     }>;
     findAll(filter: FilterTicketsDto): Promise<({
-        _count: {
-            messages: number;
-        };
         customer: {
-            name: string;
-            email: string;
             id: string;
+            email: string;
+            name: string;
             avatar: string | null;
         };
         agent: {
-            name: string;
-            email: string;
             id: string;
+            email: string;
+            name: string;
             avatar: string | null;
         } | null;
+        _count: {
+            messages: number;
+        };
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
         description: string;
         status: import("@prisma/client").$Enums.TicketStatus;
@@ -57,24 +55,24 @@ export declare class TicketsController {
         category: string | null;
         sentiment: number | null;
         imageUrls: string[];
+        createdAt: Date;
+        updatedAt: Date;
         customerId: string;
         agentId: string | null;
     })[]>;
     findMy(user: {
         id: string;
     }): Promise<({
+        agent: {
+            id: string;
+            name: string;
+            avatar: string | null;
+        } | null;
         _count: {
             messages: number;
         };
-        agent: {
-            name: string;
-            id: string;
-            avatar: string | null;
-        } | null;
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
         description: string;
         status: import("@prisma/client").$Enums.TicketStatus;
@@ -82,6 +80,8 @@ export declare class TicketsController {
         category: string | null;
         sentiment: number | null;
         imageUrls: string[];
+        createdAt: Date;
+        updatedAt: Date;
         customerId: string;
         agentId: string | null;
     })[]>;
@@ -96,38 +96,36 @@ export declare class TicketsController {
         id: string;
         role: string;
     }): Promise<{
+        customer: {
+            id: string;
+            createdAt: Date;
+            email: string;
+            name: string;
+            avatar: string | null;
+        };
+        agent: {
+            id: string;
+            email: string;
+            name: string;
+            avatar: string | null;
+        } | null;
         messages: ({
             sender: {
+                id: string;
                 name: string;
                 role: import("@prisma/client").$Enums.Role;
-                id: string;
                 avatar: string | null;
             };
         } & {
             id: string;
             createdAt: Date;
-            ticketId: string;
             content: string;
+            ticketId: string;
             senderId: string;
             isAI: boolean;
         })[];
-        customer: {
-            name: string;
-            email: string;
-            id: string;
-            avatar: string | null;
-            createdAt: Date;
-        };
-        agent: {
-            name: string;
-            email: string;
-            id: string;
-            avatar: string | null;
-        } | null;
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
         description: string;
         status: import("@prisma/client").$Enums.TicketStatus;
@@ -135,26 +133,26 @@ export declare class TicketsController {
         category: string | null;
         sentiment: number | null;
         imageUrls: string[];
+        createdAt: Date;
+        updatedAt: Date;
         customerId: string;
         agentId: string | null;
     }>;
     update(id: string, dto: UpdateTicketDto): Promise<{
         customer: {
-            name: string;
-            email: string;
             id: string;
+            email: string;
+            name: string;
             avatar: string | null;
         };
         agent: {
-            name: string;
-            email: string;
             id: string;
+            email: string;
+            name: string;
             avatar: string | null;
         } | null;
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
         description: string;
         status: import("@prisma/client").$Enums.TicketStatus;
@@ -162,6 +160,8 @@ export declare class TicketsController {
         category: string | null;
         sentiment: number | null;
         imageUrls: string[];
+        createdAt: Date;
+        updatedAt: Date;
         customerId: string;
         agentId: string | null;
     }>;

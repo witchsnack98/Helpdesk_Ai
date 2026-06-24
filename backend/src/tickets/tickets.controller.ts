@@ -42,12 +42,16 @@ export class TicketsController {
     // 3. Run AI Triage asynchronously (don't await, fire-and-forget)
     this.triageService.analyzeAndUpdate(ticket).then((triaged) => {
       if (triaged) {
-        this.gateway.emitToAgents('ticket:triaged', {
+        const payload = {
           ticketId: ticket.id,
           priority: triaged.priority,
           category: triaged.category,
           sentiment: triaged.sentiment,
-        });
+        };
+        // Broadcast to agents for dashboard updates
+        this.gateway.emitToAgents('ticket:triaged', payload);
+        // Broadcast to the specific ticket room for the detail page
+        this.gateway.emitToRoom(ticket.id, 'ticket:triaged', payload);
       }
     });
 

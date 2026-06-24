@@ -37,12 +37,14 @@ let TicketsController = class TicketsController {
         this.gateway.emitToAgents('ticket:new', ticket);
         this.triageService.analyzeAndUpdate(ticket).then((triaged) => {
             if (triaged) {
-                this.gateway.emitToAgents('ticket:triaged', {
+                const payload = {
                     ticketId: ticket.id,
                     priority: triaged.priority,
                     category: triaged.category,
                     sentiment: triaged.sentiment,
-                });
+                };
+                this.gateway.emitToAgents('ticket:triaged', payload);
+                this.gateway.emitToRoom(ticket.id, 'ticket:triaged', payload);
             }
         });
         return ticket;

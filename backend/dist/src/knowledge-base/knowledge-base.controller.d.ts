@@ -6,9 +6,9 @@ export declare class KnowledgeBaseController {
     constructor(kbService: KnowledgeBaseService, storageService: StorageService);
     findAll(): Promise<{
         id: string;
+        status: import("@prisma/client").$Enums.EmbedStatus;
         createdAt: Date;
         updatedAt: Date;
-        status: import("@prisma/client").$Enums.EmbedStatus;
         filename: string;
         fileUrl: string;
         fileSize: number;
@@ -16,9 +16,9 @@ export declare class KnowledgeBaseController {
     }[]>;
     upload(file: Express.Multer.File): Promise<{
         id: string;
+        status: import("@prisma/client").$Enums.EmbedStatus;
         createdAt: Date;
         updatedAt: Date;
-        status: import("@prisma/client").$Enums.EmbedStatus;
         filename: string;
         fileUrl: string;
         fileSize: number;
@@ -26,9 +26,9 @@ export declare class KnowledgeBaseController {
     }>;
     delete(id: string): Promise<{
         id: string;
+        status: import("@prisma/client").$Enums.EmbedStatus;
         createdAt: Date;
         updatedAt: Date;
-        status: import("@prisma/client").$Enums.EmbedStatus;
         filename: string;
         fileUrl: string;
         fileSize: number;

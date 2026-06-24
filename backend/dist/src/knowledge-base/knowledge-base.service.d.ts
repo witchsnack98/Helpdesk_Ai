@@ -11,9 +11,9 @@ export declare class KnowledgeBaseService {
     constructor(prisma: PrismaService, gemini: GeminiService, gateway: HelpdeskGateway);
     processDocument(buffer: Buffer, filename: string, fileUrl: string, fileSize: number): Promise<{
         id: string;
+        status: import("@prisma/client").$Enums.EmbedStatus;
         createdAt: Date;
         updatedAt: Date;
-        status: import("@prisma/client").$Enums.EmbedStatus;
         filename: string;
         fileUrl: string;
         fileSize: number;
@@ -23,9 +23,9 @@ export declare class KnowledgeBaseService {
     private chunkText;
     findAll(): Promise<{
         id: string;
+        status: import("@prisma/client").$Enums.EmbedStatus;
         createdAt: Date;
         updatedAt: Date;
-        status: import("@prisma/client").$Enums.EmbedStatus;
         filename: string;
         fileUrl: string;
         fileSize: number;
@@ -33,9 +33,9 @@ export declare class KnowledgeBaseService {
     }[]>;
     delete(id: string): Promise<{
         id: string;
+        status: import("@prisma/client").$Enums.EmbedStatus;
         createdAt: Date;
         updatedAt: Date;
-        status: import("@prisma/client").$Enums.EmbedStatus;
         filename: string;
         fileUrl: string;
         fileSize: number;
