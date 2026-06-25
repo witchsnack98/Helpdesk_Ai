@@ -10,6 +10,8 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @WebSocketGateway({
   cors: {
@@ -24,12 +26,42 @@ export class HelpdeskGateway
   @WebSocketServer() server: Server;
   private readonly logger = new Logger(HelpdeskGateway.name);
 
-  afterInit() {
+  constructor(
+    private jwtService: JwtService,
+    private configService: ConfigService,
+  ) {}
+
+  afterInit(server: Server) {
     this.logger.log('WebSocket Gateway initialized');
+    server.use((socket, next) => {
+      try {
+        // Parse cookie header
+        const cookieHeader = socket.handshake.headers.cookie;
+        if (!cookieHeader) {
+          return next(new Error('Authentication error: No cookies'));
+        }
+
+        const match = cookieHeader.match(/access_token=([^;]+)/);
+        if (!match) {
+          return next(new Error('Authentication error: No access token'));
+        }
+
+        const token = match[1];
+        const secret = this.configService.get<string>('JWT_ACCESS_SECRET');
+        const payload = this.jwtService.verify(token, { secret });
+
+        // Attach user info to socket
+        (socket as any).user = payload;
+        next();
+      } catch (err) {
+        next(new Error('Authentication error: Invalid token'));
+      }
+    });
   }
 
   handleConnection(client: Socket) {
-    this.logger.log(`Client connected: ${client.id}`);
+    const user = (client as any).user;
+    this.logger.log(`Client connected: ${client.id} (User ID: ${user?.sub})`);
   }
 
   handleDisconnect(client: Socket) {

@@ -25,7 +25,11 @@ export class TriageService {
     id: string;
     title: string;
     description: string;
-  }): Promise<{ priority: Priority; category: string; sentiment: number } | null> {
+  }): Promise<{
+    priority: Priority;
+    category: string;
+    sentiment: number;
+  } | null> {
     try {
       const result = await this.analyze(ticket.title, ticket.description);
 
@@ -76,7 +80,7 @@ Priority rules:
 Respond ONLY with the JSON, no markdown, no explanation.`;
 
     const raw = await this.gemini.generateText(prompt);
-    
+
     // Parse JSON — strip markdown code blocks if present
     const cleaned = raw.replace(/```json\n?|\n?```/g, '').trim();
     const parsed = JSON.parse(cleaned) as TriageResult;
@@ -112,7 +116,7 @@ Description: "${ticketDescription}"
 
 ${recentMessages.length > 0 ? `Recent conversation:\n${recentMessages.slice(-4).join('\n')}` : ''}
 
-Write a helpful, empathetic reply (2-4 sentences). Do not include a greeting or sign-off. Just the body text.`;
+Write a helpful, empathetic reply in THAI language (ตอบเป็นภาษาไทย) (2-4 sentences). Do not include a greeting or sign-off. Just the body text.`;
 
     return this.gemini.generateText(prompt);
   }

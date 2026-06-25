@@ -1,11 +1,5 @@
-import {
-  Controller,
-  Post,
-  Body,
-  UseGuards,
-  Param,
-  Get,
-} from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Res } from '@nestjs/common';
+import type { Response } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -35,9 +29,15 @@ export class AiController {
   ) {}
 
   @Post('chat')
-  async chat(@Body() dto: ChatDto) {
-    const answer = await this.ragService.query(dto.message);
-    return { answer };
+  async chat(@Body() dto: ChatDto, @Res() res: Response) {
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Transfer-Encoding', 'chunked');
+
+    const stream = this.ragService.queryStream(dto.message);
+    for await (const chunk of stream) {
+      res.write(chunk);
+    }
+    res.end();
   }
 
   @Post('suggest-reply')

@@ -7,7 +7,9 @@ export class MessagesService {
   constructor(private prisma: PrismaService) {}
 
   async create(ticketId: string, senderId: string, dto: CreateMessageDto) {
-    const ticket = await this.prisma.ticket.findUnique({ where: { id: ticketId } });
+    const ticket = await this.prisma.ticket.findUnique({
+      where: { id: ticketId },
+    });
     if (!ticket) throw new NotFoundException('Ticket not found');
 
     return this.prisma.message.create({

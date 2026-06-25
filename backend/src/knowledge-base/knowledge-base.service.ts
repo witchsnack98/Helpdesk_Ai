@@ -1,12 +1,11 @@
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const pdfParse = require('pdf-parse') as any;
-
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { GeminiService } from '../ai/gemini.service';
 import { HelpdeskGateway } from '../gateway/gateway';
 import { EmbedStatus } from '@prisma/client';
+import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
+import * as fs from 'fs/promises';
+import pdfParse from 'pdf-parse';
 
 @Injectable()
 export class KnowledgeBaseService {
@@ -35,9 +34,9 @@ export class KnowledgeBaseService {
       status: EmbedStatus.PROCESSING,
     });
 
-    this.runEmbedding(doc.id, buffer, filename).catch((err) => {
+    this.runEmbedding(doc.id, buffer, filename).catch(async (err: Error) => {
       this.logger.error(`Embedding failed for doc ${doc.id}`, err);
-      require('fs').appendFileSync('error.log', err?.stack || err + '\n');
+      await fs.appendFile('error.log', (err?.stack || err.message) + '\n');
     });
 
     return doc;
@@ -45,11 +44,17 @@ export class KnowledgeBaseService {
 
   private async runEmbedding(docId: string, buffer: Buffer, filename: string) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const pdfParse = require('pdf-parse');
       const pdfData = await pdfParse(buffer);
       const fullText = pdfData.text.replace(/\0/g, '');
-      const chunks = this.chunkText(fullText);
+
+      const splitter = new RecursiveCharacterTextSplitter({
+        chunkSize: this.CHUNK_SIZE,
+        chunkOverlap: this.CHUNK_OVERLAP,
+      });
+      const chunkedDocs = await splitter.createDocuments([fullText]);
+      const chunks = chunkedDocs
+        .map((d) => d.pageContent)
+        .filter((c) => c.length > 50);
 
       this.logger.log(`Processing ${chunks.length} chunks for ${filename}`);
 
@@ -82,25 +87,18 @@ export class KnowledgeBaseService {
         where: { id: docId },
         data: { status: EmbedStatus.FAILED },
       });
-      this.gateway.emitToAll('embed:status', { docId, status: EmbedStatus.FAILED });
+      this.gateway.emitToAll('embed:status', {
+        docId,
+        status: EmbedStatus.FAILED,
+      });
       throw err;
     }
   }
 
-  private chunkText(text: string): string[] {
-    const chunks: string[] = [];
-    let start = 0;
-    while (start < text.length) {
-      const end = Math.min(start + this.CHUNK_SIZE, text.length);
-      const chunk = text.slice(start, end).trim();
-      if (chunk.length > 50) chunks.push(chunk);
-      start += this.CHUNK_SIZE - this.CHUNK_OVERLAP;
-    }
-    return chunks;
-  }
-
   async findAll() {
-    return this.prisma.knowledgeDocument.findMany({ orderBy: { createdAt: 'desc' } });
+    return this.prisma.knowledgeDocument.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   async delete(id: string) {

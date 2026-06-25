@@ -2,16 +2,16 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
-// import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
+import { RedisIoAdapter } from './redis-io.adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Security
   app.use(helmet());
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  app.use((cookieParser as unknown as () => any)());
+
+  app.use(cookieParser());
 
   // CORS
   app.enableCors({
@@ -20,6 +20,11 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
+
+  // Redis WebSocket Adapter
+  const redisIoAdapter = new RedisIoAdapter(app);
+  await redisIoAdapter.connectToRedis();
+  app.useWebSocketAdapter(redisIoAdapter);
 
   // Global validation pipe
   app.useGlobalPipes(
@@ -40,4 +45,4 @@ async function bootstrap() {
   console.log(`🚀 Helpdesk AI Backend running on http://localhost:${port}/api`);
 }
 
-bootstrap(); // Force reload
+void bootstrap();

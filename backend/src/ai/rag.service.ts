@@ -11,7 +11,7 @@ export class RagService {
     private prisma: PrismaService,
   ) {}
 
-  async query(question: string): Promise<string> {
+  async *queryStream(question: string): AsyncGenerator<string, void, unknown> {
     try {
       // 1. Embed the user question
       const queryEmbedding = await this.gemini.generateEmbedding(question);
@@ -29,7 +29,8 @@ export class RagService {
       );
 
       if (chunks.length === 0) {
-        return "I don't have specific information about that in the knowledge base. Please contact our support team for assistance.";
+        yield 'ขออภัยค่ะ ฉันไม่มีข้อมูลเฉพาะเจาะจงเกี่ยวกับเรื่องนี้ในฐานข้อมูล โปรดติดต่อทีมสนับสนุนของเราเพื่อขอความช่วยเหลือค่ะ';
+        return;
       }
 
       // 3. Build RAG prompt
@@ -38,18 +39,22 @@ export class RagService {
         .join('\n\n');
 
       const prompt = `You are a helpful customer support AI assistant. Answer the customer's question using ONLY the provided knowledge base context. If the answer is not in the context, say so honestly.
+IMPORTANT: You MUST answer the question in THAI language (ตอบเป็นภาษาไทยเสมอ).
 
 Knowledge Base Context:
 ${context}
 
 Customer Question: "${question}"
 
-Provide a clear, helpful answer in 2-4 sentences. If referencing specific information, mention the source document.`;
+Provide a clear, helpful answer in Thai in 2-4 sentences. If referencing specific information, mention the source document.`;
 
-      return await this.gemini.generateText(prompt);
+      const stream = this.gemini.streamText(prompt);
+      for await (const chunk of stream) {
+        yield chunk;
+      }
     } catch (err) {
       this.logger.error('RAG query failed', err);
-      return 'I apologize, but I encountered an error. Please try again or contact support directly.';
+      yield 'ขออภัยค่ะ เกิดข้อผิดพลาดขึ้นในระบบ โปรดลองใหม่อีกครั้ง หรือติดต่อฝ่ายสนับสนุนโดยตรงค่ะ';
     }
   }
 }

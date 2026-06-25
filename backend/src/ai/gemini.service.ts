@@ -16,7 +16,9 @@ export class GeminiService implements AIProvider {
 
   async generateText(prompt: string): Promise<string> {
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+      const model = this.genAI.getGenerativeModel({
+        model: 'gemini-2.5-flash',
+      });
       const result = await model.generateContent(prompt);
       return result.response.text();
     } catch (error) {
@@ -25,9 +27,29 @@ export class GeminiService implements AIProvider {
     }
   }
 
+  async *streamText(prompt: string): AsyncGenerator<string, void, unknown> {
+    try {
+      const model = this.genAI.getGenerativeModel({
+        model: 'gemini-2.5-flash',
+      });
+      const result = await model.generateContentStream(prompt);
+      for await (const chunk of result.stream) {
+        const chunkText = chunk.text();
+        if (chunkText) {
+          yield chunkText;
+        }
+      }
+    } catch (error) {
+      this.logger.error('Gemini streamText failed', error);
+      throw error;
+    }
+  }
+
   async generateEmbedding(text: string): Promise<number[]> {
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-embedding-2' });
+      const model = this.genAI.getGenerativeModel({
+        model: 'gemini-embedding-2',
+      });
       const result = await model.embedContent({
         content: { role: 'user', parts: [{ text }] },
         outputDimensionality: 768,

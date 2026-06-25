@@ -15,7 +15,8 @@ export class StorageService {
       this.config.get<string>('SUPABASE_URL') || '',
       this.config.get<string>('SUPABASE_SERVICE_KEY') || '',
     );
-    this.bucket = this.config.get<string>('SUPABASE_BUCKET') || 'helpdesk-attachments';
+    this.bucket =
+      this.config.get<string>('SUPABASE_BUCKET') || 'helpdesk-attachments';
   }
 
   async uploadFile(
@@ -44,6 +45,30 @@ export class StorageService {
       .getPublicUrl(filename);
 
     return data.publicUrl;
+  }
+
+  async createPresignedUrl(
+    originalName: string,
+    folder = 'attachments',
+  ): Promise<{ uploadUrl: string; publicUrl: string }> {
+    const ext = path.extname(originalName);
+    const filename = `${folder}/${uuidv4()}${ext}`;
+
+    // Note: Supabase provides createSignedUploadUrl for uploading directly from the client
+    const { data, error } = await this.supabase.storage
+      .from(this.bucket)
+      .createSignedUploadUrl(filename);
+
+    if (error) {
+      this.logger.error('Failed to create presigned URL', error);
+      throw new Error(`Presigned URL creation failed: ${error.message}`);
+    }
+
+    const publicUrl = this.supabase.storage
+      .from(this.bucket)
+      .getPublicUrl(filename).data.publicUrl;
+
+    return { uploadUrl: data.signedUrl, publicUrl: publicUrl };
   }
 
   async deleteFile(fileUrl: string): Promise<void> {

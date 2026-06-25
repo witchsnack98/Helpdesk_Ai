@@ -9,7 +9,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { TicketsService } from './tickets.service';
-import { CreateTicketDto, UpdateTicketDto, FilterTicketsDto } from './dto/ticket.dto';
+import {
+  CreateTicketDto,
+  UpdateTicketDto,
+  FilterTicketsDto,
+} from './dto/ticket.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -17,6 +21,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Role } from '@prisma/client';
 import { HelpdeskGateway } from '../gateway/gateway';
 import { TriageService } from '../ai/triage.service';
+import { StorageService } from '../storage/storage.service';
 
 @Controller('tickets')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -25,7 +30,14 @@ export class TicketsController {
     private ticketsService: TicketsService,
     private gateway: HelpdeskGateway,
     private triageService: TriageService,
+    private storageService: StorageService,
   ) {}
+
+  @Post('upload-url')
+  @Roles(Role.CUSTOMER, Role.AGENT, Role.ADMIN)
+  async getUploadUrl(@Body() body: { filename: string; contentType: string }) {
+    return this.storageService.createPresignedUrl(body.filename);
+  }
 
   @Post()
   @Roles(Role.CUSTOMER)
@@ -86,13 +98,13 @@ export class TicketsController {
 
   @Patch(':id')
   @Roles(Role.AGENT, Role.ADMIN)
-  async update(
-    @Param('id') id: string,
-    @Body() dto: UpdateTicketDto,
-  ) {
+  async update(@Param('id') id: string, @Body() dto: UpdateTicketDto) {
     const updated = await this.ticketsService.update(id, dto);
     // Broadcast status change
-    this.gateway.emitToRoom(id, 'ticket:updated', { ticketId: id, status: updated.status });
+    this.gateway.emitToRoom(id, 'ticket:updated', {
+      ticketId: id,
+      status: updated.status,
+    });
     return updated;
   }
 }

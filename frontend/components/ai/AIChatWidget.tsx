@@ -2,14 +2,12 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import api from "@/lib/api";
 import {
   MessageCircle,
   X,
   Send,
   Loader2,
   Zap,
-  Minimize2,
   ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
@@ -40,26 +38,51 @@ export default function AIChatWidget() {
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
+    
     const userMsg: ChatMsg = { id: Date.now().toString(), role: "user", content: input.trim() };
-    setMessages((prev) => [...prev, userMsg]);
+    const aiMsgId = Date.now().toString() + "ai";
+    
+    setMessages((prev) => [...prev, userMsg, { id: aiMsgId, role: "ai", content: "" }]);
     setInput("");
     setLoading(true);
 
     try {
-      const res = await api.post("/ai/chat", { message: userMsg.content });
-      setMessages((prev) => [
-        ...prev,
-        { id: Date.now().toString() + "ai", role: "ai", content: res.data.answer },
-      ]);
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString() + "err",
-          role: "ai",
-          content: "ขออภัย เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง หรือติดต่อเจ้าหน้าที่โดยตรง",
+      const res = await fetch("http://localhost:3001/api/ai/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      ]);
+        body: JSON.stringify({ message: userMsg.content }),
+        credentials: "include", // For cookies
+      });
+
+      if (!res.ok) throw new Error("Network response was not ok");
+
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+
+      if (reader) {
+        setLoading(false);
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          const chunk = decoder.decode(value, { stream: true });
+          setMessages((prev) => 
+            prev.map((msg) => 
+              msg.id === aiMsgId ? { ...msg, content: msg.content + chunk } : msg
+            )
+          );
+        }
+      }
+    } catch {
+      setMessages((prev) => 
+        prev.map((msg) => 
+          msg.id === aiMsgId 
+            ? { ...msg, content: "ขออภัย เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง หรือติดต่อเจ้าหน้าที่โดยตรง" } 
+            : msg
+        )
+      );
     } finally {
       setLoading(false);
     }
@@ -94,15 +117,7 @@ export default function AIChatWidget() {
 
         {/* Pulse ring when closed */}
         {!open && (
-          <span
-            style={{
-              position: "absolute",
-              inset: 0,
-              borderRadius: "50%",
-              border: "2px solid rgba(59,130,246,0.4)",
-              animation: "pulse-urgent 2s infinite",
-            }}
-          />
+          <span className="absolute inset-0 rounded-full border-2 border-blue-500/40 animate-[pulse-urgent_2s_infinite]" />
         )}
       </motion.button>
 
@@ -114,64 +129,22 @@ export default function AIChatWidget() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            style={{
-              position: "fixed",
-              bottom: "92px",
-              right: "24px",
-              width: "340px",
-              height: "480px",
-              borderRadius: "var(--radius-xl)",
-              overflow: "hidden",
-              display: "flex",
-              flexDirection: "column",
-              zIndex: 100,
-              border: "1px solid var(--border-strong)",
-              boxShadow: "0 24px 64px rgba(0,0,0,0.5), 0 0 40px rgba(59,130,246,0.1)",
-              background: "var(--bg-surface)",
-            }}
+            className="fixed bottom-[92px] right-6 w-[340px] h-[480px] rounded-[var(--radius-xl)] overflow-hidden flex flex-col z-[100] border border-[var(--border-strong)] bg-[var(--bg-surface)] shadow-[0_24px_64px_rgba(0,0,0,0.5),0_0_40px_rgba(59,130,246,0.1)]"
           >
             {/* Header */}
-            <div
-              style={{
-                padding: "14px 16px",
-                background: "linear-gradient(135deg, rgba(37,99,235,0.9), rgba(124,58,237,0.9))",
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                flexShrink: 0,
-              }}
-            >
-              <div
-                style={{
-                  width: "32px", height: "32px", borderRadius: "50%",
-                  background: "rgba(255,255,255,0.2)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                }}
-              >
+            <div className="px-4 py-3.5 bg-gradient-to-br from-blue-600/90 to-purple-600/90 flex items-center gap-2.5 shrink-0">
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                 <Zap size={16} color="white" />
               </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: "13px", fontWeight: "700", color: "white" }}>AI Support Assistant</div>
-                <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", gap: "4px" }}>
-                  <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#10b981" }} />
+              <div className="flex-1">
+                <div className="text-[13px] font-bold text-white">AI Support Assistant</div>
+                <div className="text-[10px] text-white/70 flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                   Powered by Gemini · Available 24/7
                 </div>
               </div>
               <Link href="/customer/ticket/new">
-                <button
-                  style={{
-                    background: "rgba(255,255,255,0.15)",
-                    border: "1px solid rgba(255,255,255,0.2)",
-                    borderRadius: "8px",
-                    padding: "5px 8px",
-                    cursor: "pointer",
-                    color: "white",
-                    fontSize: "10px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "4px",
-                  }}
-                >
+                <button className="bg-white/15 border border-white/20 rounded-lg px-2 py-1.5 cursor-pointer text-white text-[10px] flex items-center gap-1">
                   <ExternalLink size={11} />
                   Open Ticket
                 </button>
@@ -179,42 +152,27 @@ export default function AIChatWidget() {
             </div>
 
             {/* Messages */}
-            <div
-              style={{
-                flex: 1,
-                overflowY: "auto",
-                padding: "14px 12px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "10px",
-              }}
-            >
+            <div className="flex-1 overflow-y-auto px-3 py-3.5 flex flex-col gap-2.5">
               {messages.map((msg) => (
                 <motion.div
                   key={msg.id}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  style={{
-                    display: "flex",
-                    justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
-                  }}
+                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                 >
-                  <div
-                    className={msg.role === "user" ? "bubble-customer" : "bubble-ai"}
-                    style={{ fontSize: "12px", lineHeight: "1.6", padding: "9px 12px", maxWidth: "85%" }}
-                  >
+                  <div className={`${msg.role === "user" ? "bubble-customer" : "bubble-ai"} text-xs leading-relaxed px-3 py-2 max-w-[85%]`}>
                     {msg.role === "ai" && (
-                      <div style={{ display: "flex", alignItems: "center", gap: "4px", marginBottom: "4px", fontSize: "9px", color: "#a78bfa" }}>
+                      <div className="flex items-center gap-1 mb-1 text-[9px] text-purple-400">
                         <Zap size={9} /> AI Answer
                       </div>
                     )}
-                    {msg.content}
+                    {msg.content || (msg.role === "ai" && loading && "...")}
                   </div>
                 </motion.div>
               ))}
               {loading && (
-                <div style={{ display: "flex", justifyContent: "flex-start" }}>
-                  <div className="bubble-ai" style={{ padding: "9px 12px" }}>
+                <div className="flex justify-start">
+                  <div className="bubble-ai px-3 py-2">
                     <div className="typing-indicator">
                       <div className="typing-dot" />
                       <div className="typing-dot" />
@@ -227,31 +185,19 @@ export default function AIChatWidget() {
             </div>
 
             {/* Input */}
-            <div
-              style={{
-                padding: "10px 12px",
-                borderTop: "1px solid var(--border)",
-                display: "flex",
-                gap: "8px",
-                alignItems: "center",
-                flexShrink: 0,
-                background: "var(--bg-surface)",
-              }}
-            >
+            <div className="px-3 py-2.5 border-t border-[var(--border)] flex gap-2 items-center shrink-0 bg-[var(--bg-surface)]">
               <input
                 type="text"
-                className="input-field"
+                className="input-field flex-1 px-3 py-2 text-xs"
                 placeholder="Ask anything..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                style={{ flex: 1, padding: "8px 12px", fontSize: "12px" }}
               />
               <button
                 onClick={sendMessage}
                 disabled={!input.trim() || loading}
-                className="btn-primary"
-                style={{ padding: "8px 12px", flexShrink: 0 }}
+                className="btn-primary px-3 py-2 shrink-0"
               >
                 {loading ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
               </button>

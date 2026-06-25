@@ -4,7 +4,11 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateTicketDto, UpdateTicketDto, FilterTicketsDto } from './dto/ticket.dto';
+import {
+  CreateTicketDto,
+  UpdateTicketDto,
+  FilterTicketsDto,
+} from './dto/ticket.dto';
 import { Role, TicketStatus, Prisma } from '@prisma/client';
 
 @Injectable()
@@ -20,7 +24,9 @@ export class TicketsService {
         customerId,
       },
       include: {
-        customer: { select: { id: true, name: true, email: true, avatar: true } },
+        customer: {
+          select: { id: true, name: true, email: true, avatar: true },
+        },
       },
     });
     return ticket;
@@ -42,12 +48,11 @@ export class TicketsService {
 
     return this.prisma.ticket.findMany({
       where,
-      orderBy: [
-        { priority: 'desc' },
-        { createdAt: 'desc' },
-      ],
+      orderBy: [{ priority: 'desc' }, { createdAt: 'desc' }],
       include: {
-        customer: { select: { id: true, name: true, email: true, avatar: true } },
+        customer: {
+          select: { id: true, name: true, email: true, avatar: true },
+        },
         agent: { select: { id: true, name: true, email: true, avatar: true } },
         _count: { select: { messages: true } },
       },
@@ -69,12 +74,22 @@ export class TicketsService {
     const ticket = await this.prisma.ticket.findUnique({
       where: { id },
       include: {
-        customer: { select: { id: true, name: true, email: true, avatar: true, createdAt: true } },
+        customer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            avatar: true,
+            createdAt: true,
+          },
+        },
         agent: { select: { id: true, name: true, email: true, avatar: true } },
         messages: {
           orderBy: { createdAt: 'asc' },
           include: {
-            sender: { select: { id: true, name: true, avatar: true, role: true } },
+            sender: {
+              select: { id: true, name: true, avatar: true, role: true },
+            },
           },
         },
       },
@@ -98,7 +113,9 @@ export class TicketsService {
       where: { id },
       data: dto,
       include: {
-        customer: { select: { id: true, name: true, email: true, avatar: true } },
+        customer: {
+          select: { id: true, name: true, email: true, avatar: true },
+        },
         agent: { select: { id: true, name: true, email: true, avatar: true } },
       },
     });
