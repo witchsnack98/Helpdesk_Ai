@@ -28,25 +28,25 @@ export class RagService {
         vectorLiteral,
       );
 
-      if (chunks.length === 0) {
-        yield 'ขออภัยค่ะ ฉันไม่มีข้อมูลเฉพาะเจาะจงเกี่ยวกับเรื่องนี้ในฐานข้อมูล โปรดติดต่อทีมสนับสนุนของเราเพื่อขอความช่วยเหลือค่ะ';
-        return;
+      let context = "No specific knowledge base context found.";
+      if (chunks.length > 0) {
+        context = chunks
+          .map((c, i) => `[Source ${i + 1}: ${c.source}]\n${c.content}`)
+          .join('\n\n');
       }
 
-      // 3. Build RAG prompt
-      const context = chunks
-        .map((c, i) => `[Source ${i + 1}: ${c.source}]\n${c.content}`)
-        .join('\n\n');
-
-      const prompt = `You are a helpful customer support AI assistant. Answer the customer's question using ONLY the provided knowledge base context. If the answer is not in the context, say so honestly.
+      const prompt = `You are a helpful customer support AI assistant.
 IMPORTANT: You MUST answer the question in THAI language (ตอบเป็นภาษาไทยเสมอ).
-
-Knowledge Base Context:
-${context}
 
 Customer Question: "${question}"
 
-Provide a clear, helpful answer in Thai in 2-4 sentences. If referencing specific information, mention the source document.`;
+Instructions:
+1. Try to answer the question using the provided Knowledge Base Context. If you use the context, you can mention the source document.
+2. If the context is empty, not relevant, or does not contain the answer, you MUST use your general knowledge to answer the question politely and helpfully.
+3. Provide a clear and helpful answer in Thai.
+
+Knowledge Base Context:
+${context}`;
 
       const stream = this.gemini.streamText(prompt);
       for await (const chunk of stream) {
