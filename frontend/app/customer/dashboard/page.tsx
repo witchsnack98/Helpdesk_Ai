@@ -125,14 +125,7 @@ export default function CustomerDashboardPage() {
   return (
     <div className="page-enter">
       {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          marginBottom: "24px",
-        }}
-      >
+      <div className="flex items-start justify-between mb-6">
         <div>
           <motion.h1
             initial={{ opacity: 0, y: -6 }}
@@ -145,7 +138,7 @@ export default function CustomerDashboardPage() {
             Your support tickets · updated {tickets.length > 0 ? timeAgo(tickets[0]?.updatedAt) : "just now"}
           </p>
         </div>
-        <div style={{ display: "flex", gap: "8px" }}>
+        <div className="flex gap-2">
           <button
             onClick={fetchTickets}
             className="btn-ghost"
@@ -165,14 +158,7 @@ export default function CustomerDashboardPage() {
       </div>
 
       {/* Stats */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          gap: "12px",
-          marginBottom: "24px",
-        }}
-      >
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {STAT_CARDS.map((s, i) => (
           <motion.div
             key={s.label}
@@ -227,14 +213,7 @@ export default function CustomerDashboardPage() {
       </div>
 
       {/* Section header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: "12px",
-        }}
-      >
+      <div className="flex items-center justify-between mb-3">
         <h2
           style={{
             fontSize: "13px",

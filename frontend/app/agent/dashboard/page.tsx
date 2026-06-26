@@ -315,18 +315,9 @@ export default function AgentDashboardPage() {
   ];
 
   return (
-    <div
-      style={{
-        padding: "24px 28px",
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        gap: "16px",
-        overflow: "hidden",
-      }}
-    >
+    <div className="p-6 md:p-7 h-screen flex flex-col gap-4 overflow-hidden">
       {/* ── Header ───────────────────────────────────────────────────── */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div className="flex items-center justify-between">
         <div>
           <h1
             style={{
@@ -344,7 +335,7 @@ export default function AgentDashboardPage() {
           </p>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div className="flex items-center gap-2">
           {/* Live indicator */}
           <div
             style={{
@@ -402,7 +393,7 @@ export default function AgentDashboardPage() {
       </div>
 
       {/* ── Stats row ─────────────────────────────────────────────────── */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "10px" }}>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {STAT_CARDS.map((s, i) => (
           <motion.div
             key={s.label}
@@ -472,7 +463,7 @@ export default function AgentDashboardPage() {
       </div>
 
       {/* ── Filters ───────────────────────────────────────────────────── */}
-      <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+      <div className="flex gap-3 items-center flex-wrap">
         {/* Search */}
         <div style={{ position: "relative", flex: 1, maxWidth: "280px" }}>
           <Search

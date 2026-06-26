@@ -91,13 +91,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        background: "var(--bg-base)",
-      }}
-    >
+    <div className="min-h-screen flex bg-[var(--bg-base)]">
       {/* ── Left panel — brand story ─────────────────────────────── */}
       <motion.div
         initial={{ opacity: 0, x: -24 }}

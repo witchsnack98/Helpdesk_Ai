@@ -43,9 +43,9 @@ export default function AdminUsersPage() {
   );
 
   return (
-    <div className="page-enter" style={{ display: "flex", flexDirection: "column", height: "100%", gap: "16px" }}>
+    <div className="page-enter flex flex-col h-full gap-4">
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+      <div className="flex justify-between items-end">
         <div>
           <h1 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "4px", color: "var(--text-primary)" }}>
             User Management
@@ -112,8 +112,8 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Table */}
-      <div className="glass-card" style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-        <div style={{ overflow: "auto", flex: 1 }}>
+      <div className="glass-card flex-1 overflow-hidden flex flex-col">
+        <div className="overflow-auto flex-1">
           <table className="data-table" style={{ minWidth: "700px" }}>
             <thead style={{ position: "sticky", top: 0, background: "var(--bg-base)", zIndex: 10 }}>
               <tr>

@@ -70,6 +70,55 @@
 }
 
 /* ─────────────────────────────────────────
+   DESIGN TOKENS — Dark mode, Deep Space Blue
+───────────────────────────────────────── */
+.dark {
+  /* Backgrounds: Deep Space Blue */
+  --bg-base:     oklch(0.180 0.015 258);
+  --bg-surface:  oklch(0.200 0.018 258);
+  --bg-elevated: oklch(0.230 0.022 258);
+  --bg-overlay:  oklch(0.250 0.025 258);
+
+  /* Borders: Soft reflections */
+  --border:        oklch(0.300 0.030 258);
+  --border-strong: oklch(0.380 0.040 258);
+
+  /* Brand: Slightly brighter for contrast */
+  --primary:      oklch(0.580 0.182 258);
+  --primary-hover:oklch(0.630 0.190 258);
+  --primary-text: oklch(1.000 0.000 0);
+  --primary-glow: oklch(0.580 0.182 258 / 0.25);
+
+  /* Accent */
+  --accent:       oklch(0.700 0.120 220);
+  --accent-muted: oklch(0.700 0.120 220 / 0.15);
+  --accent-border:oklch(0.700 0.120 220 / 0.40);
+
+  /* Semantic colors: Vibrant variants */
+  --color-open:     oklch(0.580 0.182 258);    /* primary blue */
+  --color-progress: oklch(0.750 0.160 60);     /* vibrant amber */
+  --color-resolved: oklch(0.680 0.155 155);    /* vibrant emerald */
+  --color-closed:   oklch(0.400 0.010 255);    /* muted */
+  --color-urgent:   oklch(0.650 0.205 18);     /* bright rose-red */
+  --color-high:     oklch(0.720 0.175 38);     /* bright orange */
+  --color-medium:   oklch(0.750 0.160 60);     /* bright amber */
+  --color-low:      oklch(0.680 0.155 155);    /* bright emerald */
+
+  /* Text */
+  --text-primary:   oklch(0.960 0.010 258);    /* near-white */
+  --text-secondary: oklch(0.800 0.015 258);    /* light gray */
+  --text-muted:     oklch(0.650 0.020 258);    /* medium gray */
+
+  /* Shadows: Subtle glow rather than deep dark shadows */
+  --shadow-card:   0 1px 3px oklch(0.000 0.000 0 / 0.3),
+                   0 4px 12px oklch(0.000 0.000 0 / 0.4);
+  --shadow-md:     0 4px 16px oklch(0.000 0.000 0 / 0.4),
+                   0 1px 4px  oklch(0.000 0.000 0 / 0.3);
+  --shadow-glow:   0 0 0 3px var(--primary-glow);
+  --shadow-primary:0 4px 14px oklch(0.580 0.182 258 / 0.35);
+}
+
+/* ─────────────────────────────────────────
    BASE RESET
 ───────────────────────────────────────── */
 *,

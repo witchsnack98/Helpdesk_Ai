@@ -80,12 +80,8 @@ export default function RegisterPage() {
 
   return (
     <div
+      className="min-h-screen flex items-center justify-center p-6"
       style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "24px",
         background:
           "radial-gradient(ellipse at 70% 30%, rgba(139,92,246,0.12) 0%, transparent 60%), radial-gradient(ellipse at 20% 80%, rgba(37,99,235,0.1) 0%, transparent 60%), var(--bg-base)",
       }}
